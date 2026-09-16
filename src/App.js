@@ -23,6 +23,7 @@ import io from "socket.io-client"
 import AboutUs from "./T&Cs/AboutUs";
 import TermsAndConditions from "./T&Cs/TermsAndConditions";
 import PrivacyPolicy from "./T&Cs/PrivacyPolicy";
+import Notification from "./NotificationPage/Notification";
 
 export const socket = io.connect("https://deeinder-backend.onrender.com")
 
@@ -112,7 +113,21 @@ function App() {
                   element={<ProtectedRoutes element={<Messages />} />}
                 />
 
-               
+                <Route
+                  exact
+                  path="/notifications"
+                  element={
+                  <ProtectedRoutes
+                   element={
+                   <>
+                    <CommonNavbar />
+                    <Notification />
+                   </>
+                   }
+                    />
+                  }
+                />
+
               </Routes>
               </MessagingContext>
             </MembersContext>
