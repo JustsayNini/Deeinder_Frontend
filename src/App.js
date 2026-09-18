@@ -24,6 +24,7 @@ import AboutUs from "./T&Cs/AboutUs";
 import TermsAndConditions from "./T&Cs/TermsAndConditions";
 import PrivacyPolicy from "./T&Cs/PrivacyPolicy";
 import Notification from "./NotificationPage/Notification";
+import ForgotPassword from "./ForgotPassword";
 
 export const socket = io.connect("https://deeinder-backend.onrender.com")
 
@@ -67,7 +68,7 @@ function App() {
                 />
 
                 <Route exact path="/Login" element={<Login />} />
-
+                <Route exact path="/forgot-password" element={<ForgotPassword />} />
                 <Route exact path="/SignUp" element={<SignUp />} />
                  <Route
                   exact
