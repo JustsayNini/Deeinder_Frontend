@@ -52,12 +52,13 @@ function Login() {
 
          
              <IconButton style={{ width: '100%',
-  height: '50px',
-  fontSize: '20px',
-  backgroundColor: '#6215a3',
-  borderRadius: '10px',
-  border: 'none',
-  margin: '10px 0 10px 0'}}variant="contained" onClick={handleLogin} loading={loading}>
+                                  height: '50px',
+                                  fontSize: '20px',
+                                  backgroundColor: '#6215a3',
+                                  borderRadius: '10px',
+                                  border: 'none',
+                                  margin: '10px 0 10px 0'}}
+                        variant="contained" onClick={handleLogin} loading={loading}>
               Login
              </IconButton>
              
@@ -68,6 +69,9 @@ function Login() {
           </form>
            {<p id="display-error">{error}</p>}
           <p>Don't have an account? <Link to="/SignUp">Sign Up</Link></p>
+          <p style={{ marginTop: '10px' }}>
+            <Link to="/forgot-password">Forgot password?</Link>
+          </p>
 
         </div>
         
