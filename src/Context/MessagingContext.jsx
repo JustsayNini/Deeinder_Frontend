@@ -29,7 +29,7 @@ function MessagingContext({children}) {
           setAllMessagesUsers([...new Set(users)])
         
         });
-      }, [currentChat,newChat]);
+      }, [newChat]);
     
 
     const [room,setRoom] = useState()  

@@ -9,11 +9,21 @@ const useFetch = (url, body, toDo) => {
   const { user, setUser, authUser } = useContext(UserContext);
   const nav = useNavigate()
 
+  const backendBase = window.location.hostname === "localhost" 
+    ? "http://localhost:8000" 
+    : "https://deeinder-backend.onrender.com";
+
+  const processedUrl = url.replace("https://deeinder-backend.onrender.com", "");
+  const fullUrl = processedUrl.startsWith("http") 
+    ? processedUrl 
+    : `${backendBase}${processedUrl.startsWith("/") ? "" : "/"}${processedUrl}`;
+
   async function get(toDo = () => {}) {
+    if (!fullUrl || fullUrl.includes("undefined")) return;
     setLoading(true);
     try {
       setLoading(true);
-      const res = await fetch(url, {
+      const res = await fetch(fullUrl, {
         headers: { authorization: `basic ${authUser}` },
       });
 
@@ -41,7 +51,7 @@ const useFetch = (url, body, toDo) => {
   async function postMedia(body, toDo) {
     try {
       setLoading(true);
-      const res = await fetch(url, {
+      const res = await fetch(fullUrl, {
         method: "POST",
         body: body,
         headers: { authorization: `basic ${authUser}` },
@@ -66,7 +76,7 @@ const useFetch = (url, body, toDo) => {
   async function postMediaNoAuth(body, toDo) {
     try {
       setLoading(true);
-      const res = await fetch(url, {
+      const res = await fetch(fullUrl, {
         method: "POST",
         body: body,
       });
@@ -91,7 +101,7 @@ const useFetch = (url, body, toDo) => {
     try {
       console.log(body);
       setLoading(true);
-      const res = await fetch(url, {
+      const res = await fetch(fullUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,7 +130,7 @@ const useFetch = (url, body, toDo) => {
     try {
       console.log(body);
       setLoading(true);
-      const res = await fetch(url, {
+      const res = await fetch(fullUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -145,7 +155,7 @@ const useFetch = (url, body, toDo) => {
   async function put(body = {}, toDo = () => {}) {
     try {
       setLoading(true);
-      const res = await fetch(url, {
+      const res = await fetch(fullUrl, {
         method: "PUT",
         headers: { "Content-Type": "application/json",authorization: `basic ${authUser}` },
         body: JSON.stringify(body),
@@ -171,7 +181,7 @@ const useFetch = (url, body, toDo) => {
   async function deleteAPI(body = {}, toDo = () => {}) {
     try {
       setLoading(true);
-      const res = await fetch(url, {
+      const res = await fetch(fullUrl, {
         method: "DELETE",
         headers: { "Content-Type": "application/json",authorization: `basic ${authUser}` },
         body: JSON.stringify(body),
@@ -197,7 +207,7 @@ const useFetch = (url, body, toDo) => {
   async function putMedia(body, toDo) {
     try {
       setLoading(true);
-      const res = await fetch(url, {
+      const res = await fetch(fullUrl, {
         method: "PUT",
         body: body,
         headers: { authorization: `basic ${authUser}` },
