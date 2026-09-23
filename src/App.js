@@ -24,10 +24,13 @@ import AboutUs from "./T&Cs/AboutUs";
 import TermsAndConditions from "./T&Cs/TermsAndConditions";
 import PrivacyPolicy from "./T&Cs/PrivacyPolicy";
 import Notification from "./NotificationPage/Notification";
-import ForgotPassword from "./ForgotPassword";
+import ForgotPassword from "./ForgotPasword";
 
-export const socket = io.connect("https://deeinder-backend.onrender.com")
+const socketUrl = window.location.hostname === "localhost" 
+  ? "http://localhost:8000" 
+  : "https://deeinder-backend.onrender.com";
 
+export const socket = io.connect(socketUrl);
 export const UserContext = React.createContext();
 
 

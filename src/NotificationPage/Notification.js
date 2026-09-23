@@ -1,55 +1,53 @@
 import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from "../App";
-import { supabase } from "../supabaseClient";
+import useFetch from "../useFetch";
 import "./Notification.css";
 
 function Notification() {
   const [activeTab, setActiveTab] = useState("NEW");
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  
+  const { user, url, authUser } = useContext(UserContext);
 
-  const { user } = useContext(UserContext);
+  const { get, loading } = useFetch(
+    `${url}/notifications/${user?.username}`
+  );
 
   useEffect(() => {
-    async function fetchNotifications() {
-      if (!user?.username) return;
+    if (!user?.username) return;
+    get((data) => {
+      setNotifications(data || []);
+    });
+  }, [user?.username]);
 
-      setLoading(true);
-
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("username", user.username)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching notifications:", error);
-        setNotifications([]);
-      } else {
-        setNotifications(data || []);
+  const handleMarkAsRead = (id) => {
+    fetch(`${url}/notifications/read/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `basic ${localStorage.getItem("authUser") || authUser}`
       }
-
-      setLoading(false);
-    }
-
-    fetchNotifications();
-  }, [user]);
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setNotifications((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, is_read: true } : item
+          )
+        );
+      })
+      .catch((err) => console.error("Error marking read:", err));
+  };
 
   const filteredNotifications = notifications.filter((notification) => {
     if (activeTab === "ALL") return true;
-
-    if (activeTab === "NEW") {
-      return notification.is_read === false;
-    }
-
-    if (activeTab === "OLD") {
-      return notification.is_read === true;
-    }
-
+    if (activeTab === "NEW") return notification.is_read === false;
+    if (activeTab === "OLD") return notification.is_read === true;
     return true;
   });
 
   const getTimelinePeriod = (timestamp) => {
+    if (!timestamp) return "OLDER";
     const createdDate = new Date(timestamp);
     const today = new Date();
 
@@ -66,9 +64,7 @@ function Notification() {
     );
 
     const diffTime = todayDate - createdDateOnly;
-    const diffDays = Math.floor(
-      diffTime / (1000 * 60 * 60 * 24)
-    );
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return "TODAY";
     if (diffDays === 1) return "YESTERDAY";
@@ -80,15 +76,12 @@ function Notification() {
   const todayItems = filteredNotifications.filter(
     (item) => getTimelinePeriod(item.created_at) === "TODAY"
   );
-
   const yesterdayItems = filteredNotifications.filter(
     (item) => getTimelinePeriod(item.created_at) === "YESTERDAY"
   );
-
   const thisWeekItems = filteredNotifications.filter(
     (item) => getTimelinePeriod(item.created_at) === "THIS WEEK"
   );
-
   const olderItems = filteredNotifications.filter(
     (item) => getTimelinePeriod(item.created_at) === "OLDER"
   );
@@ -99,14 +92,10 @@ function Notification() {
 
   return (
     <div className="notification-page">
-
       <div className="notification-header">
         <div className="notification-title-wrapper">
           <div className="notification-icon">
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
               <path
                 d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
                 fill="none"
@@ -143,9 +132,7 @@ function Notification() {
           onClick={() => setActiveTab("NEW")}
         >
           NEW
-          {unreadCount > 0 && (
-            <span className="tab-count">{unreadCount}</span>
-          )}
+          {unreadCount > 0 && <span className="tab-count">{unreadCount}</span>}
         </button>
 
         <button
@@ -164,7 +151,6 @@ function Notification() {
       </div>
 
       <div className="notification-list">
-
         {loading && (
           <div className="notification-state">
             <div className="loading-spinner"></div>
@@ -194,9 +180,7 @@ function Notification() {
             </div>
 
             <h3>No notifications</h3>
-            <p>
-              You don't have any notifications in this category yet.
-            </p>
+            <p>You don't have any notifications in this category yet.</p>
           </div>
         )}
 
@@ -204,6 +188,7 @@ function Notification() {
           <NotificationGroup
             title="TODAY"
             items={todayItems}
+            onRead={handleMarkAsRead}
           />
         )}
 
@@ -211,6 +196,7 @@ function Notification() {
           <NotificationGroup
             title="YESTERDAY"
             items={yesterdayItems}
+            onRead={handleMarkAsRead}
           />
         )}
 
@@ -218,6 +204,7 @@ function Notification() {
           <NotificationGroup
             title="THIS WEEK"
             items={thisWeekItems}
+            onRead={handleMarkAsRead}
           />
         )}
 
@@ -225,6 +212,7 @@ function Notification() {
           <NotificationGroup
             title="OLDER"
             items={olderItems}
+            onRead={handleMarkAsRead}
           />
         )}
       </div>
@@ -232,10 +220,9 @@ function Notification() {
   );
 }
 
-function NotificationGroup({ title, items }) {
+function NotificationGroup({ title, items, onRead }) {
   return (
     <section className="notification-group">
-
       <div className="group-heading">
         <span>{title}</span>
         <div className="group-line"></div>
@@ -243,23 +230,16 @@ function NotificationGroup({ title, items }) {
 
       <div className="group-items">
         {items.map((item) => (
-          <NotificationCard
-            key={item.id}
-            item={item}
-          />
+          <NotificationCard key={item.id} item={item} onRead={onRead} />
         ))}
       </div>
-
     </section>
   );
 }
 
-
-function NotificationCard({ item }) {
-
+function NotificationCard({ item, onRead }) {
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
-
     return new Date(timestamp).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -267,78 +247,41 @@ function NotificationCard({ item }) {
   };
 
   const getInitial = () => {
-    return (
-      item.actor_username?.charAt(0)?.toUpperCase() ||
-      "?"
-    );
+    return item.sender_username?.charAt(0)?.toUpperCase() || "?";
   };
 
   return (
     <div
-      className={`notification-card ${
-        !item.is_read ? "unread" : ""
-      }`}
+      className={`notification-card ${!item.is_read ? "unread" : ""}`}
+      onClick={() => {
+        if (!item.is_read) onRead(item.id);
+      }}
     >
-
-      {!item.is_read && (
-        <span className="unread-dot"></span>
-      )}
+      {!item.is_read && <span className="unread-dot"></span>}
 
       <div className="notification-avatar">
-
         {item.actor_pfp ? (
-          <img
-            src={item.actor_pfp}
-            alt=""
-          />
+          <img src={item.actor_pfp} alt="" />
         ) : (
           <span>{getInitial()}</span>
         )}
-
       </div>
-
 
       <div className="notification-content">
-
         <div className="notification-message">
-          <strong>
-            {item.actor_username || "Someone"}
-          </strong>
-
-          <p>
-            {item.content}
-          </p>
+          <strong>{item.sender_username || "Someone"}</strong>
+          <p>{item.content}</p>
         </div>
 
-        <span className="notification-time">
-          {formatTime(item.created_at)}
-        </span>
-
+        <span className="notification-time">{formatTime(item.created_at)}</span>
       </div>
-
 
       {item.type === "connect" && (
         <div className="notification-actions">
-
-          <button className="accept-btn">
-            Accept
-          </button>
-
-          <button className="decline-btn">
-            Decline
-          </button>
-
+          <button className="accept-btn">Accept</button>
+          <button className="decline-btn">Decline</button>
         </div>
       )}
-
-      {item.image_url && (
-        <img
-          className="notification-thumbnail"
-          src={item.image_url}
-          alt=""
-        />
-      )}
-
     </div>
   );
 }

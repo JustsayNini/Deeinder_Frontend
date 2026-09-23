@@ -59,32 +59,31 @@ const ConnectionRequests = () => {
 
   function handleRemoveConnectionRecieved(senderUsername) {
     removeRequest({ senderUsername, recieverUsername: user.username }, () => {
-      setFetch(fetch + 1);
+      setFetch((prev) => prev + 1);
     });
   }
 
   function handleRemoveConnectionSent(recieverUsername) {
     removeRequest({ senderUsername: user.username, recieverUsername }, () => {
-      setFetch(fetch + 1);
+      setFetch((prev) => prev + 1);
     });
   }
 
   function handleAcceptConnection(senderUsername) {
-    console.log(user.username);
     put({ senderUsername }, () => {
-      setFetch(fetch + 1);
+      setFetch((prev) => prev + 1);
     });
   }
 
   function handleCancelRequest(recieverUsername) {
     cancelRequest({ senderUsername: user.username, recieverUsername }, () => {
-      setFetch(fetch + 1);
+      setFetch((prev) => prev + 1);
     });
   }
 
   function handleRemoveRequest(senderUsername) {
     cancelRequest({ senderUsername, recieverUsername: user.username }, () => {
-      setFetch(fetch + 1);
+      setFetch((prev) => prev + 1);
     });
   }
 
@@ -161,11 +160,9 @@ const ConnectionRequests = () => {
                     button2={
                       connection.hasAccepted ? "Remove" : "Cancel Request"
                     }
-                    img={`${
-                      allMembers.find((person) => {
-                        return person.username === connection.recieverUsername;
-                      }).pfpPath
-                    }`}
+                    img={
+                      allMembers?.find((person) => person.username === connection.senderUsername)?.pfpPath || ""
+                    }
                   />
                 )}
                 {connection.recieverUsername === user.username && (
@@ -195,11 +192,9 @@ const ConnectionRequests = () => {
                     button2={
                       connection.hasAccepted ? "Remove" : "Remove Request"
                     }
-                    img={`${
-                      allMembers.find((person) => {
-                        return person.username === connection.senderUsername;
-                      }).pfpPath
-                    }`}
+                    img={
+                      allMembers?.find((person) => person.username === connection.recieverUsername)?.pfpPath || ""
+                    }
                   />
                 )}
               </>

@@ -32,15 +32,14 @@ function ForgotPassword() {
         const code = Math.floor(100000 + Math.random() * 900000).toString();
         setGeneratedCode(code);
 
-        // TODO: Replace these with your teammate's actual EmailJS Service ID, Template ID, and Public Key
         await emailjs.send(
-          'YOUR_SERVICE_ID', 
-          'YOUR_TEMPLATE_ID', 
+          'DeeinderEmails', 
+          'template_u8da33m', 
           {
             to_email: email,
             passcode: code,
           }, 
-          'YOUR_PUBLIC_KEY'
+          'F_qqrchccYEyHBNgj'
         );
 
         setLoading(false);
