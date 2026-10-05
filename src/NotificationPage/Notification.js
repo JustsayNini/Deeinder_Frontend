@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from "../App";
 import useFetch from "../useFetch";
+import { useNavigate } from "react-router-dom";
 import "./Notification.css";
 
 function Notification() {
   const [activeTab, setActiveTab] = useState("NEW");
   const [notifications, setNotifications] = useState([]);
-  
   const { user, url, authUser } = useContext(UserContext);
 
   const { get, loading } = useFetch(
@@ -20,7 +20,7 @@ function Notification() {
     });
   }, [user?.username]);
 
-  const handleMarkAsRead = (id) => {
+  const handleMarkAsRead = (id, callback = () => {}) => {
     fetch(`${url}/notifications/read/${id}`, {
       method: "PUT",
       headers: {
@@ -35,6 +35,7 @@ function Notification() {
             item.id === id ? { ...item, is_read: true } : item
           )
         );
+        callback();
       })
       .catch((err) => console.error("Error marking read:", err));
   };
@@ -113,7 +114,7 @@ function Notification() {
             </svg>
 
             {unreadCount > 0 && (
-              <span className="notification-badge">
+              <span className="notification-badge-header">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
@@ -238,6 +239,8 @@ function NotificationGroup({ title, items, onRead }) {
 }
 
 function NotificationCard({ item, onRead }) {
+  const navigate = useNavigate();
+
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
     return new Date(timestamp).toLocaleTimeString([], {
@@ -250,12 +253,26 @@ function NotificationCard({ item, onRead }) {
     return item.sender_username?.charAt(0)?.toUpperCase() || "?";
   };
 
+  const handleCardClick = () => {
+    const actionToDo = () => {
+      if (item.type === "connect" || item.type === "connection") {
+        navigate("/connections");
+      } else if (item.sender_username) {
+        navigate(`/userProfile/${item.sender_username}`);
+      }
+    };
+
+    if (!item.is_read) {
+      onRead(item.id, actionToDo);
+    } else {
+      actionToDo();
+    }
+  };
+
   return (
     <div
       className={`notification-card ${!item.is_read ? "unread" : ""}`}
-      onClick={() => {
-        if (!item.is_read) onRead(item.id);
-      }}
+      onClick={handleCardClick}
     >
       {!item.is_read && <span className="unread-dot"></span>}
 
@@ -277,7 +294,7 @@ function NotificationCard({ item, onRead }) {
       </div>
 
       {item.type === "connect" && (
-        <div className="notification-actions">
+        <div className="notification-actions" onClick={(e) => e.stopPropagation()}>
           <button className="accept-btn">Accept</button>
           <button className="decline-btn">Decline</button>
         </div>

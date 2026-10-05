@@ -130,7 +130,7 @@ function Home() {
                 value={searchText}
                 onChange={search}
                 onBlur={handleSearchInputBlur}
-                placeHolder="Search"
+                placeholder="Search"
                 className="search"
               />
             </a>

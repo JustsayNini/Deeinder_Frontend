@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import './CommonNavbar.css'
 import { UserContext } from '../App';
+import NotificationIndicator from '../NotificationsIndicator/NotificationIndicator'; 
 import LogoutIcon from '@mui/icons-material/Logout';
 
 function CommonNavbar() {
@@ -14,7 +15,7 @@ function CommonNavbar() {
 
           <div id="common-nav-icons">
           <Link to="/Home"><i className="fa-solid fa-house-chimney nav-icons"></i></Link>
-
+          <NotificationIndicator />
           <Link to="/connections"><i className="fa-solid fa-users-rays nav-icons"></i></Link>
 
           <Link to="/messages"  id="msg-icon-link"><SendOutlinedIcon sx={{fontSize:"1.6em"}} id="msg-icon" className="nav-icons"/></Link>
